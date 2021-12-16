@@ -4,6 +4,7 @@ const chaiHttp = require('chai-http');
 // const app = 'http://localhost:3000';
 const mongoose = require('mongoose');
 const User = require('../models/sample_user')
+
 let url = 'http://localhost:3000';
 const create = require('../controllers/sample_user');
 chai.use(chaiHttp);
@@ -16,7 +17,8 @@ beforeEach((done) => {
 
 describe("Create", function() {
     before(function (done) {
-        mongoose.connect('mongodb://localhost:27017/test_crud');
+        mongoose.connect('mongodb://localhost:27017/test_crud')
+                .then(res => res.json())
         const db = mongoose.connection;
         db.on('error', console.error.bind(console, 'connection error'));
         db.once('open', function() {
@@ -25,13 +27,18 @@ describe("Create", function() {
         });
     });
     
-    it("creates new user", (done) => {
+    it("creates new user", async (done) => {
         const user = new User({ 
             name: 'Meredeith',
             age: 28,
             surgeon: true
          });
-         user.save(done)
+        await user.save()
+        const users = User.find()
+                         .then(res => console.log(res,'Response'))
+        // console.log(users)
+         //done() tells mocha that test is done
+         //const amount_users = users.length()
             // .then(() => {
             //     expect(User.find.length()).to.equal(1)
             // })
