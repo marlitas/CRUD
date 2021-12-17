@@ -4,7 +4,7 @@
   "description": "crud components",
   "main": "app.js",
   "scripts": {
-    "test": "mocha --recursive --exit --reporter spec",
+    "test": "nyc --reporter=html --reporter=text mocha --recursive --exit --reporter spec",
     "start": "node app.js",
     "dev": "nodemon app"
   },
@@ -21,6 +21,7 @@
     "express": "^4.17.1",
     "mocha": "^9.1.3",
     "mongoose": "^6.1.1",
+    "nyc": "^15.1.0",
     "validator": "^13.7.0"
   }
 }
