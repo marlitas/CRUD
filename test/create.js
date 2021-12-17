@@ -1,12 +1,14 @@
 const chai = require('chai');
 const expect = chai.expect
 const chaiHttp = require('chai-http');
-// const app = 'http://localhost:3000';
-const mongoose = require('mongoose');
-const User = require('../models/sample_user')
+const app = require('../app.js');
 
-let url = 'http://localhost:3000';
-const create = require('../controllers/sample_user');
+const mongoose = require('mongoose');
+let User = require('../models/user');
+// let url = 'http://localhost:3000';
+
+// const create = require('../controllers/usersController');
+
 chai.use(chaiHttp);
 
 beforeEach((done) => {
@@ -41,18 +43,6 @@ describe("Create", function() {
     });
 
     it("can create new user POST /users", (done) => {
-        const expected = {
-            'data': {
-                'type': 'user',
-                'id': '',
-                'attributes': {
-                    'name': 'Derek',
-                    'age': 32,
-                    'hobby': 'fishing',
-                    'surgeon': true
-                }
-            }
-        };
         const user = {
             name: 'Derek',
             age: 32,
@@ -60,16 +50,18 @@ describe("Create", function() {
             surgeon: true
         };
 
-        chai.request(url)
-            .post('/sample_users')
+        chai.request(app)
+            .post('/users/new')
             .set('content-type', 'application/json')
             .send(JSON.stringify(user))
-            .then((res) => {
-                res.should.have.status(200);
-                expect(res).equal(expected.json());
+            .end((err, res) => {
+                if (err) done(err);
+                expect(res).to.have.status(200);
+                expect(res.body.data).to.be.an('object');
+                expect(res.body.data).to.have.all.keys('type', 'id', 'attributes');
+                expect(res.body.data.type).to.equal('user')
+                expect(res.body.data.attributes).to.have.all.keys('name', 'age', 'hobby', 'surgeon', 'dateAdded');
                 done();
-            }).catch((res) => {
-                console.log(res, 'res');
-            })
+            });
     });
 });
