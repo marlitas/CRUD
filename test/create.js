@@ -18,7 +18,6 @@ beforeEach((done) => {
 describe("Create", function() {
     before(function (done) {
         mongoose.connect('mongodb://localhost:27017/test_crud')
-                .then(res => res.json())
         const db = mongoose.connection;
         db.on('error', console.error.bind(console, 'connection error'));
         db.once('open', function() {
@@ -27,34 +26,33 @@ describe("Create", function() {
         });
     });
     
-    it("creates new user", async (done) => {
+    it("creates new user", async () => {
         const user = new User({ 
-            name: 'Meredeith',
+            name: 'Meredith',
             age: 28,
             surgeon: true
          });
-        await user.save()
-        const users = User.find()
-                         .then(res => console.log(res,'Response'))
-        // console.log(users)
-         //done() tells mocha that test is done
-         //const amount_users = users.length()
-            // .then(() => {
-            //     expect(User.find.length()).to.equal(1)
-            // })
-    });
-    it("throws error with invalid user", (done) => {
-        const badUser = new User({
-            notName: 'Wrong'
-        });
 
-        badUser.save(err => {
-            if(err) {return done(); }
-            throw new Error('Should generate error!');
-        })
-    })
+        await user.save();
+        User.find()
+            .then((res) => {
+                expect(res[-1].name).equal('Meredith');
+            })
+    });
+
     it("can create new user POST /users", (done) => {
-        const existing = User.find.length();
+        const expected = {
+            'data': {
+                'type': 'user',
+                'id': '',
+                'attributes': {
+                    'name': 'Derek',
+                    'age': 32,
+                    'hobby': 'fishing',
+                    'surgeon': true
+                }
+            }
+        };
         const user = {
             name: 'Derek',
             age: 32,
@@ -64,10 +62,14 @@ describe("Create", function() {
 
         chai.request(url)
             .post('/sample_users')
-            .send(JSON.stringify(user));
-
-        const current = User.find.length();
-
-        expect(existing + 1).to.equal(current);
+            .set('content-type', 'application/json')
+            .send(JSON.stringify(user))
+            .then((res) => {
+                res.should.have.status(200);
+                expect(res).equal(expected.json());
+                done();
+            }).catch((res) => {
+                console.log(res, 'res');
+            })
     });
 });
